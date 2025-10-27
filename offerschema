@@ -1,0 +1,77 @@
+<script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SpecialAnnouncement",
+        "name": "🎉 Festive Offers on  
+Product name
+ ",
+        "text": "Limited time festive discounts available on this product",
+        "datePosted": "2025-08-01",
+        "expires": "2025-12-31",
+        "announcementLocation": {
+            "@type": "Place",
+            "name": "Ventin Pharma Online Store",
+            "url": " 
+Product URL
+ "
+        },
+        "offers": [{
+                "@type": "Offer",
+                "name": "DIWALI15 - 15% OFF",
+                "description": "Use code  for 15% OFF on orders ₹799+",
+                "price": "  
+Product price
+ ",
+                "priceCurrency": "INR",
+                "availability": "https://schema.org/InStock",
+                "url": " 
+Product URL
+ ",
+                "priceSpecification": {
+                    "@type": "UnitPriceSpecification",
+                    "price": "15",
+                    "unitText": "PERCENT"
+                },
+                "eligibleTransactionVolume": {
+                    "@type": "PriceSpecification",
+                    "priceCurrency": "INR",
+                    "minPrice": "799"
+                },
+                "validFrom": "2025-08-01",
+                "validThrough": "2025-12-31",
+                "priceValidUntil": "2025-12-31"
+            },
+            {
+                "@type": "Offer",
+                "name": "DIWALI10 - 10% OFF",
+                "description": "Use code DIWALI10 for 10% OFF on orders 399+",
+                "price": "  
+Product price
+ ",
+                "priceCurrency": "INR",
+                "availability": "https://schema.org/InStock",
+                "url": " 
+Product URL
+ ",
+                "priceSpecification": {
+                    "@type": "UnitPriceSpecification",
+                    "price": "10",
+                    "unitText": "PERCENT"
+                },
+                "eligibleTransactionVolume": {
+                    "@type": "PriceSpecification",
+                    "priceCurrency": "INR",
+                    "minPrice": "399"
+                },
+                "validFrom": "2025-08-01",
+                "validThrough": "2025-12-31",
+                "priceValidUntil": "2025-12-31"
+            }
+        ],
+        "publisher": {
+            "@type": "Organization",
+            "name": "Ventin Pharma",
+            "url": "https://www.ventin.in"
+        }
+    }
+</script>
