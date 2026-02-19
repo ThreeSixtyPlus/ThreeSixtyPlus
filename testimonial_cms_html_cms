@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #1A1A1A;
+            --card: #2A2A2A;
+            --cyan: #00E0FF;
+            --purple: #5200FF;
+            --text: #F2F3F0;
+            --muted: #B0B0B0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: transparent;
+            padding: 0;
+            margin: 0;
+            color: #F2F3F0 !important;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 24px;
+            padding: 20px;
+        }
+
+        .testi-card {
+            background: var(--card);
+            padding: 36px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 224, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .testi-card:hover {
+            border-color: rgba(0, 224, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 224, 255, 0.08);
+        }
+
+        .testi-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .testi-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--cyan);
+            flex-shrink: 0;
+            background: var(--card);
+            display: block;
+        }
+
+        .testi-author h4 {
+            color: var(--cyan) !important;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .testi-author p {
+            color: var(--text) !important;
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        .testi-text {
+            color: #F2F3F0 !important;
+            line-height: 1.8;
+            font-style: italic;
+            font-size: 15px;
+            opacity: 0.85;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+            font-size: 16px;
+        }
+
+        @media (max-width: 900px) {
+            .testimonials-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 20px;
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+            .testi-card {
+                padding: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading state -->
+    <div id="loadingState" class="loading">Loading testimonials...</div>
+
+    <!-- Container where Velo will inject testimonials -->
+    <div id="testimonialsContainer" class="testimonials-grid" style="display: none;"></div>
+
+    <script>
+        // Listen for messages from Wix Velo
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'RENDER_TESTIMONIALS') {
+                renderTestimonials(event.data.data);
+            }
+        });
+
+        // Notify Wix that iframe is ready
+        window.parent.postMessage({ type: 'READY' }, '*');
+
+        // =============================================
+        // FIX #1: Proper Wix Image URL extraction
+        // =============================================
+        function getWixImageUrl(imageSource) {
+            if (!imageSource) return '';
+
+            // If it's an object, extract the src/url first
+            if (typeof imageSource === 'object' && imageSource !== null) {
+                imageSource = imageSource.src || imageSource.url || imageSource.image || imageSource.value || '';
+            }
+
+            if (typeof imageSource !== 'string' || !imageSource) return '';
+
+            // Already a valid URL
+            if (imageSource.startsWith('http://') || imageSource.startsWith('https://')) {
+                return imageSource;
+            }
+
+            // Wix image format: wix:image://v1/<mediaId>/<filename>#originWidth=X&originHeight=Y
+            if (imageSource.startsWith('wix:image://')) {
+                try {
+                    // Remove the prefix and hash params
+                    const withoutPrefix = imageSource.replace('wix:image://v1/', '');
+                    const withoutHash = withoutPrefix.split('#')[0];
+                    // Extract ONLY the mediaId (before the slash-filename)
+                    const mediaId = withoutHash.split('/')[0];
+                    
+                    if (mediaId) {
+                        return 'https://static.wixstatic.com/media/' + mediaId;
+                    }
+                } catch (e) {
+                    console.error('Error parsing Wix image URL:', e);
+                }
+            }
+
+            // Might be just a media ID directly
+            if (!imageSource.includes('/') && !imageSource.includes(':')) {
+                return 'https://static.wixstatic.com/media/' + imageSource;
+            }
+
+            return '';
+        }
+
+        // =============================================
+        // FIX #2: Strip existing quotes from review text
+        // =============================================
+        function cleanReviewText(text) {
+            if (!text) return '';
+            // Strip HTML tags (CMS rich text fields include <p class="font_8"> etc.)
+            const temp = document.createElement('div');
+            temp.innerHTML = text;
+            const plain = temp.textContent || temp.innerText || '';
+            // Remove leading/trailing quotes (straight and curly)
+            return plain.replace(/^[\u201C\u201D\u201E\u201F"']+|[\u201C\u201D\u201E\u201F"']+$/g, '').trim();
+        }
+
+        // Function to render testimonials
+        function renderTestimonials(testimonials) {
+            const container = document.getElementById('testimonialsContainer');
+            const loading = document.getElementById('loadingState');
+
+            loading.style.display = 'none';
+
+            console.log('Rendering testimonials, count:', testimonials.length);
+
+            if (!testimonials || testimonials.length === 0) {
+                container.innerHTML = '<p style="color: #B0B0B0; text-align: center; padding: 40px;">No testimonials found</p>';
+                container.style.display = 'block';
+                return;
+            }
+
+            container.style.display = 'grid';
+            container.innerHTML = '';
+
+            testimonials.forEach((data, index) => {
+                console.log('Card ' + (index + 1) + ':', data);
+                const card = createTestimonialCard(data);
+                container.appendChild(card);
+            });
+            
+            console.log('All cards rendered successfully');
+        }
+
+        // Create testimonial card element
+        function createTestimonialCard(data) {
+            const card = document.createElement('div');
+            card.className = 'testi-card';
+
+            // Handle location - Wix location objects are complex
+            let locationText = '';
+            if (data.location) {
+                if (typeof data.location === 'string') {
+                    locationText = data.location;
+                } else if (typeof data.location === 'object') {
+                    locationText = data.location.formattedAddressLine || 
+                                  data.location.formatted || 
+                                  data.location.cityName || 
+                                  data.location.text || 
+                                  data.location.name || 
+                                  data.location.value || 
+                                  data.location.label ||
+                                  '';
+                    
+                    if (!locationText && data.location.cityName) {
+                        const parts = [];
+                        if (data.location.cityName) parts.push(data.location.cityName);
+                        if (data.location.subdivision) parts.push(data.location.subdivision);
+                        if (data.location.country) parts.push(data.location.country);
+                        locationText = parts.join(', ');
+                    }
+                }
+            }
+
+            // FIX: Use proper Wix image URL extraction
+            let profileImage = getWixImageUrl(data.profile);
+            
+            console.log('Profile field raw:', data.profile);
+            console.log('Profile image resolved:', profileImage);
+
+            // Fallback to initials avatar
+            const fallbackUrl = 'https://ui-avatars.com/api/?name=' + 
+                encodeURIComponent(data.clientName || 'Client') + 
+                '&background=00E0FF&color=1A1A1A&size=128&bold=true';
+            
+            if (!profileImage) {
+                profileImage = fallbackUrl;
+            }
+
+            // FIX: Clean review text to avoid double quotes
+            const reviewText = cleanReviewText(data.review);
+
+            // Build card HTML safely
+            const header = document.createElement('div');
+            header.className = 'testi-header';
+
+            const img = document.createElement('img');
+            img.src = profileImage;
+            img.alt = data.clientName || 'Client';
+            img.className = 'testi-avatar';
+            img.onerror = function() { this.src = fallbackUrl; };
+
+            const authorDiv = document.createElement('div');
+            authorDiv.className = 'testi-author';
+
+            const nameEl = document.createElement('h4');
+            nameEl.textContent = data.clientName || 'Anonymous';
+            authorDiv.appendChild(nameEl);
+
+            if (locationText) {
+                const locEl = document.createElement('p');
+                locEl.textContent = locationText;
+                authorDiv.appendChild(locEl);
+            }
+
+            header.appendChild(img);
+            header.appendChild(authorDiv);
+
+            const textEl = document.createElement('p');
+            textEl.className = 'testi-text';
+            textEl.textContent = '\u201C' + reviewText + '\u201D';
+
+            card.appendChild(header);
+            card.appendChild(textEl);
+
+            return card;
+        }
+    </script>
+
+</body>
+</html>
