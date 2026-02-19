@@ -1,0 +1,84 @@
+import wixData from 'wix-data';
+
+const TAG_FIELD = 'tags1';
+const ALL_VALUE = 'All Work';
+
+// ---- testimonials state (module‑level)
+let testimonialsItems = [];
+let iframeReady = false;
+
+$w.onReady(function () {
+    // BLOCK 1 — Selection Tags Filter
+    $w('#selectionTags1').selectedIndices = [0];
+
+    $w('#selectionTags1').onChange(() => {
+        let values = $w('#selectionTags1').value;
+
+        if (values.length > 1) {
+            const last = values[values.length - 1];
+            $w('#selectionTags1').value = [last];
+            values = [last];
+        }
+
+        const selected = values[0];
+        let filter = wixData.filter();
+
+        if (!selected || selected === ALL_VALUE) {
+            $w('#dataset1').setFilter(filter);
+            return;
+        }
+
+        filter = filter.hasSome(TAG_FIELD, [selected]);
+        $w('#dataset1').setFilter(filter);
+    });
+
+    // ----- HTML iframe messaging -----
+    const htmlElement = $w('#html6');
+
+    // listen once and keep handler alive
+    htmlElement.onMessage((event) => {
+        if (event.data && event.data.type === 'READY') {
+            iframeReady = true;
+            // when iframe says READY, push data if already loaded
+            if (testimonialsItems.length > 0) {
+                htmlElement.postMessage({
+                    type: 'RENDER_TESTIMONIALS',
+                    data: testimonialsItems
+                });
+            }
+        }
+    });
+
+    // load testimonials
+    loadAndSendTestimonials();
+});
+
+async function loadAndSendTestimonials() {
+    try {
+        console.log('Loading testimonials...');
+
+        const results = await wixData.query('Testimonials')
+            .hasSome('graphic_testi', ['ecom_photo'])
+            .limit(6)
+            .ascending('order_ecom')
+            .find();
+
+        console.log('Found', results.items.length, 'testimonials');
+
+        if (results.items && results.items.length > 0) {
+            testimonialsItems = results.items; // save in module var
+
+            // if iframe already READY, send immediately
+            if (iframeReady) {
+                $w('#html6').postMessage({
+                    type: 'RENDER_TESTIMONIALS',
+                    data: testimonialsItems
+                });
+            }
+        } else {
+            console.log('No testimonials found');
+        }
+    } catch (error) {
+        console.error('Error loading testimonials:', error);
+    }
+}
