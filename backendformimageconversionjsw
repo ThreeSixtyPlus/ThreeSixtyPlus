@@ -1,0 +1,28 @@
+// ═══════════════════════════════════════════════════════════════
+//  BACKEND — backend/mediaUpload.jsw
+//  Uploads base64 images to Wix Media Manager
+// ═══════════════════════════════════════════════════════════════
+
+import { mediaManager } from 'wix-media-backend';
+
+export async function uploadBase64File(fileName, base64Data, mimeType) {
+    const buffer = Buffer.from(base64Data, 'base64');
+
+    const result = await mediaManager.upload(
+        '/quote-references',
+        buffer,
+        fileName,
+        {
+            mediaOptions: {
+                mimeType: mimeType || 'image/jpeg',
+                mediaType: 'image'
+            },
+            metadataOptions: {
+                isPrivate: false,
+                isVisitorUpload: true
+            }
+        }
+    );
+
+    return result.fileUrl;
+}
