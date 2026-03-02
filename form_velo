@@ -1,0 +1,101 @@
+// ═══════════════════════════════════════════════════════════════
+//  PAGE CODE — Photography Quote
+//  Collection: ProductShootRequests
+//  HTML Element: #htmlPhotoQuote
+// ═══════════════════════════════════════════════════════════════
+
+import wixData from 'wix-data';
+import { uploadBase64File } from 'backend/mediaUpload.jsw';
+
+$w.onReady(function () {
+
+    $w('#htmlPhotoQuote').onMessage((event) => {
+        const data = event.data;
+        if (!data || !data.type) return;
+
+        if (data.type === 'QUOTE_SUBMIT') {
+            handleSubmission(data.payload);
+        }
+
+        if (data.type === 'GO_BACK') {
+            // $w('#serviceStatebox').changeState('serviceSelect');
+        }
+    });
+
+});
+
+
+function formatWebsite(url) {
+    if (!url || !url.trim()) return '';
+    let clean = url.trim().toLowerCase();
+    clean = clean.replace(/^https?:\/\//, '');
+    clean = clean.replace(/^www\./, '');
+    if (!clean) return '';
+    return 'https://' + clean;
+}
+
+
+async function handleSubmission(formData) {
+    try {
+
+        // ─── Upload reference images to Wix Media Manager ───
+        const mediaItems = [];
+
+        if (formData.referenceFiles && formData.referenceFiles.length > 0) {
+            for (const file of formData.referenceFiles) {
+                try {
+                    const fileUrl = await uploadBase64File(
+                        file.name,
+                        file.data,
+                        file.type
+                    );
+                    mediaItems.push({
+                        type:  'image',
+                        src:   fileUrl,
+                        title: file.name
+                    });
+                } catch (uploadErr) {
+                    console.error('Upload failed for:', file.name, uploadErr);
+                }
+            }
+        }
+
+        // ─── Build CMS item ───
+        const item = {
+            title:             formData.fullName + ' — Photography',
+            serviceType:       'Photography',
+            fullName:          formData.fullName,
+            companyName:       formData.companyName,
+            email:             formData.email,
+            phone:             formData.phone,
+            address:           formData.address,
+            website:           formatWebsite(formData.website),
+            numberOfProducts:  parseInt(formData.numberOfProducts) || 0,
+            imagesPerProduct:  formData.imagesPerProduct,
+            productShootType:  formData.productShootType,
+            photographyType:   formData.photographyType || '',
+            whereFoundUs:      formData.whereFoundUs,
+            deadline:          new Date(formData.deadline),
+            imageStyles:       formData.imageStyles,
+            referenceFiles:    mediaItems,   // ← Media Gallery array
+            status:            'New',
+            submittedAt:       new Date()
+        };
+
+        const result = await wixData.insert('ProductShootRequests', item);
+        console.log('Quote saved:', result._id);
+
+        $w('#htmlPhotoQuote').postMessage({
+            type: 'SUBMIT_SUCCESS',
+            id:   result._id
+        });
+
+    } catch (err) {
+        console.error('Submission failed:', err);
+
+        $w('#htmlPhotoQuote').postMessage({
+            type: 'SUBMIT_ERROR',
+            message: err.message || 'Failed to save'
+        });
+    }
+}
