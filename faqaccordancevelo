@@ -1,0 +1,152 @@
+import wixData from 'wix-data';
+import wixWindow from 'wix-window';
+
+let currentOpenId = null;
+let isMobile = false;
+
+// ── Universal binder: reuse for every simple repeater ──
+function bindRepeater(repeaterId, fieldMap) {
+    $w(repeaterId).onItemReady(($item, itemData) => {
+        fieldMap.forEach(({ selector, field, type }) => {
+            const val = itemData[field] ?? "";
+            if (type === "text")       $item(selector).text = val;
+            else if (type === "html")  $item(selector).html = val;
+            else if (type === "image") $item(selector).src  = val;
+        });
+    });
+}
+
+// ── Universal query runner ──
+async function loadRepeater(repeaterId, collection, tagField, tag, limit = 50) {
+    try {
+        const result = await wixData.query(collection)
+            .hasSome(tagField, [tag])
+            .ascending("order")
+            .limit(limit)
+            .find();
+
+        console.log(`${tag} count:`, result.items.length);
+        $w(repeaterId).data = result.items;
+    } catch (e) {
+        console.error(`${tag} error:`, e);
+    }
+}
+
+// ── FAQ Accordion binder ──
+function bindFaqRepeater() {
+    $w("#faqRepeater").onItemReady(($item, itemData, index) => {
+        $item("#faqQuestion").text = itemData.question ?? "";
+        $item("#faqAnswerText").html = `<span style="color:#9A9A9A; font-size:14px; font-family:'DM Sans', sans-serif">${itemData.answer ?? ""}</span>`;
+
+        if (isMobile) {
+            $item("#faqAnswerText").collapse();
+            $item("#faqAnswer").collapse();
+
+            if (index === 0) {
+                currentOpenId = itemData._id;
+                $item("#faqAnswer").expand().then(() => {
+                    $item("#faqAnswerText").expand();
+                });
+            }
+        } else {
+            $item("#faqAnswer").customClassList.add("faq-answer");
+
+            if (index === 0) {
+                currentOpenId = itemData._id;
+                setTimeout(() => {
+                    $item("#faqAnswer").customClassList.add("visible");
+                }, 50);
+            }
+        }
+
+        $item("#faqHeader").onClick(() => {
+            const clickedId = itemData._id;
+            if (isMobile) {
+                mobileToggle(clickedId, $item);
+            } else {
+                desktopToggle(clickedId, $item);
+            }
+        });
+    });
+}
+
+// ── Mobile toggle ──
+function mobileToggle(clickedId, $item) {
+    if (currentOpenId === clickedId) {
+        $item("#faqAnswerText").collapse().then(() => {
+            $item("#faqAnswer").collapse();
+        });
+        currentOpenId = null;
+        return;
+    }
+
+    if (currentOpenId !== null) {
+        $w("#faqRepeater").forItems([currentOpenId], ($prev) => {
+            $prev("#faqAnswerText").collapse().then(() => {
+                $prev("#faqAnswer").collapse();
+            });
+        });
+    }
+
+    $item("#faqAnswer").expand().then(() => {
+        $item("#faqAnswerText").expand();
+    });
+    currentOpenId = clickedId;
+}
+
+// ── Desktop toggle (CSS class approach) ──
+function desktopToggle(clickedId, $item) {
+    if (currentOpenId === clickedId) {
+        $item("#faqAnswer").customClassList.remove("visible");
+        currentOpenId = null;
+        return;
+    }
+
+    if (currentOpenId !== null) {
+        $w("#faqRepeater").forItems([currentOpenId], ($prev) => {
+            $prev("#faqAnswer").customClassList.remove("visible");
+        });
+    }
+
+    $item("#faqAnswer").customClassList.add("visible");
+    currentOpenId = clickedId;
+}
+
+// ══════════════════════════════════════════════
+//  MAIN
+// ══════════════════════════════════════════════
+$w.onReady(function () {
+
+    isMobile = wixWindow.formFactor === "Mobile";
+
+    // STEP 1: Register ALL bindings FIRST
+
+    bindRepeater("#listingOne", [
+        { selector: "#listingOneTitle", field: "title",        type: "text"  },
+        { selector: "#desTextOne",      field: "description1", type: "text"  },
+        { selector: "#ImageVector",     field: "image",        type: "image" },
+    ]);
+
+    bindRepeater("#listingTwo", [
+        { selector: "#listingTwoTitle",   field: "title",        type: "text"  },
+        { selector: "#desTextTwo",        field: "description1", type: "text"  },
+        { selector: "#vectorImageTwo",    field: "image",        type: "image" },
+        { selector: "#listingBulletTwo",  field: "bulletPoints", type: "html"  },
+    ]);
+
+    bindRepeater("#listingThree", [
+        { selector: "#listingThreeTitle", field: "title",        type: "text"  },
+        { selector: "#desTextThree",      field: "description1", type: "text"  },
+        { selector: "#vectorImageThree",  field: "image",        type: "image" },
+    ]);
+
+    bindFaqRepeater();
+
+    // STEP 2: Load data AFTER all bindings
+
+    loadRepeater("#listingOne",   "PageListings", "arraystring", "seo_ranking",  6);
+    loadRepeater("#listingTwo",   "PageListings", "arraystring", "seo_services", 6);
+    loadRepeater("#listingThree", "PageListings", "arraystring", "seo_why",      8);
+    loadRepeater("#faqRepeater",  "Faqs",         "arraystring", "seo_faq",     10);
+
+});
