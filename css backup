@@ -1,0 +1,349 @@
+
+.gradienttextstyle .rich-text__text {
+  background: linear-gradient(300deg, #783df4,#00e0ff,#783df4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+.gradientbtn.button {
+  background: linear-gradient(300deg, #783df4, #00e0ff);
+  transition: background 0.3s ease;
+}
+
+.gradientbtn.button:hover {
+  background: linear-gradient(300deg, #00e0ff, #783df4);
+}
+
+/* DEFAULT: Keep Wix's natural link colors, just add hover */
+a[href],
+a.text-link,
+a.button-link,
+a.link {
+  text-decoration: none !important;
+  transition: color 0.3s ease !important;
+}
+a[href]:hover,
+a.text-link:hover,
+a.button-link:hover,
+a.link:hover {
+  color: #00E0FF !important;
+}
+
+/* FORCE WHITE on dark backgrounds */
+.dark-bg a[href],
+.dark-bg a.text-link,
+.dark-bg a.button-link,
+.dark-bg a.link {
+  color: white !important;
+}
+
+/* FORCE DARK on light backgrounds */
+.light-section a[href],
+.light-section a.text-link,
+.light-section a.button-link,
+.light-section a.link {
+  color: #1A1A1A !important;
+}
+
+.bullet-accent .rich-text__text li::marker {
+  color: #00E0FF;
+}
+/* ══════════════════════════════════════
+   SCROLL REVEAL
+   ══════════════════════════════════════ */
+.reveal-card {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal-card.on {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+/* Stagger Delays */
+.d1 { transition-delay: 0.08s; }
+.d2 { transition-delay: 0.16s; }
+.d3 { transition-delay: 0.24s; }
+.d4 { transition-delay: 0.32s; }
+.d5 { transition-delay: 0.40s; }
+.d6 { transition-delay: 0.48s; }
+
+/* ══════════════════════════════════════
+   CARD HOVER — SLIDE UP (Velo-triggered)
+   ══════════════════════════════════════ */
+.hover-card {
+    transition: transform 0.32s ease, box-shadow 0.3s ease;
+}
+.hover-card.lifted {
+    transform: translateY(-6px) !important;
+    box-shadow: 0 24px 56px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* ══════════════════════════════════════
+   IMAGE ZOOM ON HOVER (Velo-triggered)
+   ══════════════════════════════════════ */
+.zoom-img {
+    filter: brightness(0.82) saturate(0.9);
+    transition: transform 0.45s ease, filter 0.4s ease;
+}
+.zoom-img.zoomed {
+    transform: scale(1.05) !important;
+    filter: brightness(0.95) saturate(1.05) !important;
+}
+
+/* ══════════════════════════════════════
+   IMAGE CONTAINER — TRANSPARENT
+   ══════════════════════════════════════ */
+.img-container {
+    overflow: hidden;
+    background: transparent !important;
+    border: none !important;
+}
+
+/* ══════════════════════════════════════
+   IMAGE GRADIENT FADE OVERLAY
+   ══════════════════════════════════════ */
+.img-fade {
+    position: relative;
+    overflow: hidden;
+}
+.img-fade::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: linear-gradient(to top, #2A2A2A, transparent);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* ══════════════════════════════════════
+   VIEWING STATE — GREYED OUT
+   ══════════════════════════════════════ */
+.viewing-state {
+    opacity: 0.4 !important;
+}
+/* ── TICK LIST ── */
+/* Universal tick list - targets all possible Wix structures */
+.ticklist ul,
+.ticklist ol {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.ticklist ul li,
+.ticklist ol li {
+    position: relative !important;
+    padding-left: 26px !important;
+    margin-bottom: 10px !important;
+    line-height: 1.8 !important;
+    color: #A0A0A0 !important;
+}
+
+.ticklist ul li::before,
+.ticklist ol li::before {
+    content: "✓" !important;
+    color: #00E0FF !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    line-height: 1.8 !important;
+}
+
+/* Fix Wix p tag inside li */
+.ticklist ul li p,
+.ticklist ol li p {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: inline !important;
+}
+
+/* Hide default bullet */
+.ticklist ul li::marker,
+.ticklist ol li::marker {
+    display: none !important;
+    content: "" !important;
+}
+/* Viewing state — greyed out */
+.viewing-state {
+    opacity: 0.4 !important;
+    pointer-events: none !important;
+    cursor: default !important;
+}
+#storeTop {
+  height: 3px;
+  width: 100%;
+  opacity: 0.85;
+}
+/* ── CATEGORY LABEL COLORS ── */
+.accent-purple #storeCat {
+  color: #c084fc !important;
+  border-color: rgba(192,132,252,0.35) !important;
+}
+.accent-cyan #storeCat {
+  color: #00E0FF !important;
+  border-color: rgba(0,224,255,0.35) !important;
+}
+.accent-amber #storeCat {
+  color: #fbbf24 !important;
+  border-color: rgba(251,191,36,0.35) !important;
+}
+.accent-gold #storeCat {
+  color: #ffd700 !important;
+  border-color: rgba(255,215,0,0.35) !important;
+}
+.accent-violet #storeCat {
+  color: #a855f7 !important;
+  border-color: rgba(168,85,247,0.35) !important;
+}
+
+/* ── BULLET DOT COLORS ── */
+.accent-purple #storeBullet li::before {
+  color: #c084fc !important;
+}
+.accent-cyan #storeBullet li::before {
+  color: #00E0FF !important;
+}
+.accent-amber #storeBullet li::before {
+  color: #fbbf24 !important;
+}
+.accent-gold #storeBullet li::before {
+  color: #ffd700 !important;
+}
+.accent-violet #storeBullet li::before {
+  color: #a855f7 !important;
+}
+/* ── Store top bar ── */
+#storeTop {
+  height: 3px;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+/* ── Image container clips zoom + preserves radius ── */
+#storeItem,
+#storeItem > *,
+#storeItem > * > * {
+  border-radius: 12px !important;
+}
+
+#storeImageBox,
+#storeImageBox > *,
+#storeImageBox > * > *,
+#storeImageBox > * > * > * {
+  overflow: hidden !important;
+  border-radius: 12px 12px 0 0 !important;
+}
+/* Universal arrow list - replicates tick structure for Wix */
+.arrowlist ul,
+.arrowlist ol {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.arrowlist ul li,
+.arrowlist ol li {
+    position: relative !important;
+    padding-left: 26px !important;
+    margin-bottom: 10px !important;
+    line-height: 1.8 !important;
+    color: #A0A0A0 !important;
+}
+
+.arrowlist ul li::before,
+.arrowlist ol li::before {
+    content: "➔" !important;
+    color: #00E0FF !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    line-height: 1.8 !important;
+}
+/* ══════════════════════════════════════════════
+   FAQ ACCORDION — COMPLETE CSS
+   ══════════════════════════════════════════════ */
+
+
+/* ── Answer: Hidden by default ── */
+
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+/* ── Answer: Visible when open ── */
+
+.faq-answer.visible {
+    max-height: 600px;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+/* ── Divider line under each question ── */
+
+#faqHeader {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+
+/* ── Chevron rotation (uncomment if you have #faqArrow) ── */
+/*
+.faq-chevron {
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.faq-chevron.flipped {
+    transform: rotate(180deg);
+}
+*/
+
+
+/* ══════════════════════════════════════════════
+   MOBILE OVERRIDES
+   ══════════════════════════════════════════════ */
+@media (max-width: 750px) {
+
+    #faqRepeater {
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    #faqRepeater > div,
+    #faqRepeater > div > div {
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    #faqHeader {
+        height: auto !important;
+        min-height: 48px;
+    }
+
+    #faqQuestion,
+    #faqAnswer,
+    #faqAnswerText {
+        height: auto !important;
+        min-height: 0 !important;
+    }
+}
